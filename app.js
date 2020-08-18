@@ -2,6 +2,7 @@ require('dotenv').config()
 const Discord = require('discord.js')
 const fs = require('fs')
 const ytdl = require('ytdl-core')
+const pause = require('./commands/pause')
 // const qp = require('./commands/queueprocess.js')
 
 const client = new Discord.Client()
@@ -11,7 +12,9 @@ const CommandObj = {
   'ping': 'ping',
   'p': 'play',
   'leave': 'leave',
-  'q': 'queue'
+  'q': 'queue',
+  'pause': 'pause',
+  'resume':'resume'
 }
 
 const queue = [];
@@ -38,6 +41,7 @@ const onSongStart = () => {
   });
 }
 
+
 client.commands = new Discord.Collection()
 
 const commandFiles = fs.readdirSync('./commands/').filter(file => file.endsWith('.js'))
@@ -56,19 +60,7 @@ client.on('message', async message => {
     queueObj.push(message.content)
     const args = message.content.slice(prefix.length).split(/ +/)
     const command = args.shift().toLowerCase()    
-
-    // if (command === 'p')
-    //   await client.commands.get(CommandObj[command]).execute(message,args, (url) => {
-    //     queue.push(url);
-    //   }, () => {
-    //     queue.shift();
-    //   }, ()=>{
-    //     queue.push(args[0])
-    //   })
-    // else 
-    //   await client.commands.get(CommandObj[command]).execute(message,args)
     if (command === 'p') {
-
       queue.push({message, args});
       if (!isPlaying) {
         onSongStart();
@@ -83,5 +75,8 @@ client.on('message', async message => {
       await client.commands.get(CommandObj[command]).execute(message,args)
   }
 })
+// client.on('voiceStateUpdate.connection',() =>{
+//   setTimeout()
+// } )
 
 client.login(process.env.DISCORD_BOT_TOKEN)
