@@ -7,7 +7,6 @@ const pause = require('./commands/pause')
 
 const client = new Discord.Client()
 const prefix = '-'
-const queueObj = []
 const CommandObj = {
   'ping': 'ping',
   'p': 'play',
@@ -16,6 +15,12 @@ const CommandObj = {
   'pause': 'pause',
   'resume':'resume'
 }
+const ownerID = process.env.OWNERID
+const discordBotID = process.env.DISCORD_BOT_ID
+const guildID = process.env.SEVER_ID
+
+let timer 
+let theVoiceChannel
 
 const queue = [];
 let isPlaying = false;
@@ -57,9 +62,14 @@ client.once('ready', () => {
 client.on('message', async message => {
   if(!message.content.startsWith(prefix) || message.author.bot) return
   if (message.content.startsWith(prefix)) {
-    queueObj.push(message.content)
+    theVoiceChannel = message.member.voice.channel
+    // SPLIT THE MESSAGE 
     const args = message.content.slice(prefix.length).split(/ +/)
     const command = args.shift().toLowerCase()    
+    let ops ={
+      ownerID:ownerID
+    }
+    // QUEUE PROCESS USING RECURSIVE UNTIL FIRGUE OUT THE BETTER WAY TO DO THIS :) 
     if (command === 'p') {
       queue.push({message, args});
       if (!isPlaying) {
@@ -75,8 +85,25 @@ client.on('message', async message => {
       await client.commands.get(CommandObj[command]).execute(message,args)
   }
 })
-// client.on('voiceStateUpdate.connection',() =>{
-//   setTimeout()
-// } )
+
+// SET LEAVE TIMER WHEN YOU LEAVE THE CHANNEL 
+ client.on('voiceStateUpdate',(oldState, newState) =>{
+  let before = oldState.channel
+  let after = newState.channel
+  console.log(after);
+  if(before && !after)
+  {
+    // console.log('Setting leaving time from the channel')
+    timer = setTimeout(() =>{
+      theVoiceChannel.leave()
+
+    },900000)
+  }
+  else if(after)
+  { 
+    clearTimeout(timer)
+  }
+})
+  
 
 client.login(process.env.DISCORD_BOT_TOKEN)

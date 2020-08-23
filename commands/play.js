@@ -10,11 +10,14 @@ module.exports = {
   async execute(message,args) {
     voiceChannel = message.member.voice.channel
     let url = args[0]
+    let validate = ytdl.validateURL(url)
     // SIMPLE CHECK
 
     if (!voiceChannel) return message.channel.send('Please join the voice Channel')
     if (message.guild.member.voiceChannel) return message.channel.send('You just not in the same sever')
     if (!args[0]) return message.channel.send('Input the video URL')
+
+    if (!validate) return message.channel.send('Please input a valid URL')
     // START PLAYING THE URL
     const info = await ytdl.getBasicInfo(url);
     // console.log(info);
@@ -36,6 +39,7 @@ module.exports = {
       
     dispatcher.setVolumeLogarithmic(5 / 5)
     },
+  // PAUSE AND RESUME 
   pauseTheSong(){
     //pause the song 
     dispatcher.pause()
